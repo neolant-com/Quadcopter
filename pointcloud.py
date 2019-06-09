@@ -57,6 +57,7 @@ def is_close(range):
     else:
         return range < MIN_DISTANCE
 
+
 class MainWindow(QtGui.QMainWindow):
 
     def __init__(self, URI):
@@ -94,7 +95,7 @@ class MainWindow(QtGui.QMainWindow):
             self.hover['height'])
 
     def updateHover(self, k, v):
-        if (k != 'height'):
+        if k != 'height':
             self.hover[k] = v * SPEED_FACTOR
         else:
             self.hover[k] += v
@@ -198,37 +199,41 @@ class Canvas(scene.SceneCanvas):
 
         scene.visuals.XYZAxis(parent=self.view.scene)
 
-    cf = Crazyflie(rw_cache='./cache')
-    with SyncCrazyflie(URI, cf=cf) as scf:
-        with MotionCommander(scf) as motion_commander:
-            with Multiranger(scf) as multiranger:
-                keep_flying = True
+    def automotion(self):
+        cf = Crazyflie(rw_cache='./cache')
+        with SyncCrazyflie(URI, cf=cf) as scf:
+            with MotionCommander(scf) as motion_commander:
+                with Multiranger(scf) as multiranger:
+                    keep_flying = True
 
-                while keep_flying:
-                    VELOCITY = 0.3
-                    velocity_x = 0.2
-                    velocity_y = 0.0
+                    while keep_flying:
+                        if is_close(multiranger.front):
+                            motion_commander.start_back(0.1)
+                            motion_commander.turn_right(90)
 
-                    if is_close(multiranger.front):
-                        velocity_x -= VELOCITY
-                        motion_commander.turn_right(90)
+                        if is_close(multiranger.front) and is_close(multiranger.right):
+                            motion_commander.turn_left(90)
+                            motion_commander.start_forward(0.1)
 
-                    if is_close(multiranger.back):
-                        velocity_x += VELOCITY
+                        if is_close(multiranger.front) and is_close(multiranger.left):
+                            motion_commander.turn_right(90)
+                            motion_commander.start_forward(0.1)
 
-                    if is_close(multiranger.left):
-                        velocity_y -= VELOCITY
-                    if is_close(multiranger.right):
-                        velocity_y += VELOCITY
+                        if is_close(multiranger.back):
+                            motion_commander.start_forward(0.2)
 
-                    if is_close(multiranger.up):
-                        motion_commander.land(0.1)
+                        if is_close(multiranger.left):
+                            motion_commander.start_right(0.1)
 
-                    motion_commander.start_linear_motion(
-                        velocity_x, velocity_y, 0)
+                        if is_close(multiranger.right):
+                            motion_commander.start_left(0.1)
 
-                    time.sleep(0.1)
+                        if is_close(multiranger.up):
+                            motion_commander.land(0.1)
 
+                        motion_commander.start_linear_motion(0.3, 0, 0)
+
+                        time.sleep(0.1)
 
     def on_key_press(self, event):
         if (not event.native.isAutoRepeat()):
