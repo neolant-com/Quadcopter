@@ -22,6 +22,7 @@ from cflib.crazyflie.log import LogConfig
 from cflib.crazyflie.syncCrazyflie import SyncCrazyflie
 from cflib.positioning.motion_commander import MotionCommander
 from cflib.utils.multiranger import Multiranger
+import random
 
 try:
     from sip import setapi
@@ -344,18 +345,18 @@ if __name__ == '__main__':
                     motion_commander.start_linear_motion(0.2, 0, 0)
 
                     while is_close(multiranger.front) and is_close(multiranger.right) and is_close(multiranger.left):
-                        motion_commander.start_back(0.1)
+                        motion_commander.turn_right(180, 90)
+                        motion_commander.start_forward(0.1)
 
                     while is_close(multiranger.front):
-                        motion_commander.start_back(0.1)
-                        motion_commander.turn_right(90)
+                        motion_commander.turn_right(90, 90)
 
                     while is_close(multiranger.front) and is_close(multiranger.right):
-                        motion_commander.turn_left(90)
+                        motion_commander.turn_left(90, 90)
                         motion_commander.start_forward(0.1)
 
                     while is_close(multiranger.front) and is_close(multiranger.left):
-                        motion_commander.turn_right(90)
+                        motion_commander.turn_right(90, 90)
                         motion_commander.start_forward(0.1)
 
                     while is_close(multiranger.back):
