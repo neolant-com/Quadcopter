@@ -44,13 +44,13 @@ PLOT_CF = False
 PLOT_SENSOR_UP = False
 PLOT_SENSOR_DOWN = False
 # Set the sensor threashold (in mm)
-SENSOR_TH = 4000
+SENSOR_TH = 3000
 # Set the speed factor for moving and rotating
 SPEED_FACTOR = 0.3
 
 
 def is_close(range):
-    MIN_DISTANCE = 0.4  # m
+    MIN_DISTANCE = 0.3  # m
 
     if range is None:
         return False
@@ -199,41 +199,6 @@ class Canvas(scene.SceneCanvas):
 
         scene.visuals.XYZAxis(parent=self.view.scene)
 
-    def automotion(self):
-        cf = Crazyflie(rw_cache='./cache')
-        with SyncCrazyflie(URI, cf=cf) as scf:
-            with MotionCommander(scf) as motion_commander:
-                with Multiranger(scf) as multiranger:
-                    keep_flying = True
-
-                    while keep_flying:
-                        if is_close(multiranger.front):
-                            motion_commander.start_back(0.1)
-                            motion_commander.turn_right(90)
-
-                        if is_close(multiranger.front) and is_close(multiranger.right):
-                            motion_commander.turn_left(90)
-                            motion_commander.start_forward(0.1)
-
-                        if is_close(multiranger.front) and is_close(multiranger.left):
-                            motion_commander.turn_right(90)
-                            motion_commander.start_forward(0.1)
-
-                        if is_close(multiranger.back):
-                            motion_commander.start_forward(0.2)
-
-                        if is_close(multiranger.left):
-                            motion_commander.start_right(0.1)
-
-                        if is_close(multiranger.right):
-                            motion_commander.start_left(0.1)
-
-                        if is_close(multiranger.up):
-                            motion_commander.land(0.1)
-
-                        motion_commander.start_linear_motion(0.3, 0, 0)
-
-                        time.sleep(0.1)
 
     def on_key_press(self, event):
         if (not event.native.isAutoRepeat()):
@@ -369,3 +334,41 @@ if __name__ == '__main__':
     win = MainWindow(URI)
     win.show()
     appQt.exec_()
+
+    cf = Crazyflie(rw_cache='./cache')
+    with SyncCrazyflie(URI, cf=cf) as scf:
+        with MotionCommander(scf) as motion_commander:
+            with Multiranger(scf) as multiranger:
+                keep_flying = True
+
+                while keep_flying:
+                    motion_commander.start_linear_motion(0.2, 0, 0)
+
+                    while is_close(multiranger.front) and is_close(multiranger.right) and is_close(multiranger.left):
+                        motion_commander.start_back(0.1)
+
+                    while is_close(multiranger.front):
+                        motion_commander.start_back(0.1)
+                        motion_commander.turn_right(90)
+
+                    while is_close(multiranger.front) and is_close(multiranger.right):
+                        motion_commander.turn_left(90)
+                        motion_commander.start_forward(0.1)
+
+                    while is_close(multiranger.front) and is_close(multiranger.left):
+                        motion_commander.turn_right(90)
+                        motion_commander.start_forward(0.1)
+
+                    while is_close(multiranger.back):
+                        motion_commander.start_forward(0.2)
+
+                    while is_close(multiranger.left):
+                        motion_commander.start_right(0.1)
+
+                    while is_close(multiranger.right):
+                        motion_commander.start_left(0.1)
+
+                    while is_close(multiranger.up):
+                        motion_commander.land(0.1)
+
+                    time.sleep(0.1)
