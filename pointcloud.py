@@ -334,7 +334,6 @@ if __name__ == '__main__':
     win = MainWindow(URI)
     win.show()
     appQt.exec_()
-
     cf = Crazyflie(rw_cache='./cache')
     with SyncCrazyflie(URI, cf=cf) as scf:
         with MotionCommander(scf) as motion_commander:
