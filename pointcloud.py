@@ -22,7 +22,6 @@ from cflib.crazyflie.log import LogConfig
 from cflib.crazyflie.syncCrazyflie import SyncCrazyflie
 from cflib.positioning.motion_commander import MotionCommander
 from cflib.utils.multiranger import Multiranger
-import random
 
 try:
     from sip import setapi
