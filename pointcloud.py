@@ -198,21 +198,26 @@ class Canvas(scene.SceneCanvas):
 
         scene.visuals.XYZAxis(parent=self.view.scene)
 
-    # def automotion(self):
-    #     with SyncCrazyflie(URI, cf=MainWindow.cf) as scf:
-    #         with MotionCommander(scf) as motion_commander:
-    #             with Multiranger(scf) as multiranger:
-    #                 keep_flying = True
-    #                 while keep_flying:
-    #                     self.keyCB('x', 1)
-    #                     if is_close(multiranger.front_distance) and is_close(multiranger.right) and is_close(multiranger.left):
-    #                         self.keyCB('yaw', 90)
-    #                     if is_close(multiranger.front) and multiranger.right < multiranger.left:
-    #                         self.keyCB('yaw', -90)
-    #                     if is_close(multiranger.front) and multiranger.right > multiranger.left:
-    #                         self.keyCB('yaw', 90)
-    #                     if is_close(multiranger.up):
-    #                         self.keyCB('z', -1)
+    def automotion(self):
+        with SyncCrazyflie(URI, cf=MainWindow.cf) as scf:
+            with MotionCommander(scf) as motion_commander:
+                with Multiranger(scf) as multiranger:
+                    keep_flying = True
+                    while keep_flying:
+                        self.keyCB('x', 1)
+                        if (is_close(multiranger.front_distance) and
+                                is_close(multiranger.right) and is_close(multiranger.left)):
+                            self.keyCB('yaw', 180)
+                        if is_close(multiranger.front) and multiranger.right < multiranger.left:
+                            self.keyCB('yaw', 90)
+                        if is_close(multiranger.front) and multiranger.right > multiranger.left:
+                            self.keyCB('yaw', -90)
+                        if is_close(multiranger.up):
+                            self.keyCB('z', -1)
+                        if is_close(multiranger.right):
+                            self.keyCB('yaw', 45)
+                        if is_close(multiranger.left):
+                            self.keyCB('yaw', -45)
 
     def on_key_press(self, event):
         if (not event.native.isAutoRepeat()):
