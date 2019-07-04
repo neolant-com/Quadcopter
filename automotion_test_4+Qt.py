@@ -51,6 +51,7 @@ class MainWindow(QtGui.QMainWindow):
         # self.hoverTimer.setInterval(100)
         # self.hoverTimer.start()
 
+
 if __name__ == '__main__':
     # Initialize the low-level drivers (don't list the debug drivers)
 

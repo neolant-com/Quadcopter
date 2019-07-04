@@ -49,13 +49,13 @@ if __name__ == '__main__':
                     if is_close(multiranger.front) and multiranger.right > multiranger.left:
                         motion_commander.turn_right(90, 90)
 
-                    if is_close(multiranger.front) and is_close(multiranger.right):
-                        motion_commander.turn_left(90, 90)
-                        motion_commander.start_forward(0.1)
-
-                    if is_close(multiranger.front) and is_close(multiranger.left):
-                        motion_commander.turn_right(90, 90)
-                        motion_commander.start_forward(0.1)
+                    # if is_close(multiranger.front) and is_close(multiranger.right):
+                    #     motion_commander.turn_left(90, 90)
+                    #     motion_commander.start_forward(0.1)
+                    #
+                    # if is_close(multiranger.front) and is_close(multiranger.left):
+                    #     motion_commander.turn_right(90, 90)
+                    #     motion_commander.start_forward(0.1)
 
                     if is_close(multiranger.back):
                         motion_commander.start_forward(0.2)

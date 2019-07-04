@@ -39,13 +39,12 @@ if len(sys.argv) > 1:
 # Enable plotting of Crazyflie
 PLOT_CF = True
 # Enable plotting of down sensor
-PLOT_SENSOR_UP = False
-PLOT_SENSOR_DOWN = False
+PLOT_SENSOR_UP = True
+PLOT_SENSOR_DOWN = True
 # Set the sensor threashold (in mm)
 SENSOR_TH = 4000
 # Set the speed factor for moving and rotating
 SPEED_FACTOR = 0.1
-keep_flying = True
 
 
 def is_close(range):
@@ -84,32 +83,12 @@ class MainWindow(QtGui.QMainWindow):
         self.motion_commander = MotionCommander(self.cf)
         self.multiranger = Multiranger(self.cf)
         # self.motion_commander.take_off(0.3, 0.1)
-        # self.hover = {'x': 0.0, 'y': 0.0, 'z': 0.0, 'yaw': 0.0, 'height': 0.3}
+        self.hover = {'x': 0.0, 'y': 0.0, 'z': 0.0, 'yaw': 0.0, 'height': 0.2}
+
         self.hoverTimer = QtCore.QTimer()
-        self.hoverTimer.timeout.connect(self.automotion)
+        self.hoverTimer.timeout.connect(self.sendHoverCommand)
         self.hoverTimer.setInterval(100)
         self.hoverTimer.start()
-
-    def automotion(self):
-        while 1:
-            print(f"Multiranger.up = {self.multiranger.up}, {type(self.multiranger.up)}")
-            print(f"Data from logs = ")
-            if is_close(self.multiranger.up):
-                self.motion_commander.land(0.1)
-                break
-            if is_close(self.multiranger.front) and is_close(self.multiranger.right) and is_close(self.multiranger.left):
-                self.motion_commander.turn_right(180, 90)
-            if is_close(self.multiranger.front) and self.multiranger.right < self.multiranger.left:
-                self.motion_commander.turn_left(90, 90)
-            if is_close(self.multiranger.front) and self.multiranger.right > self.multiranger.left:
-                self.motion_commander.turn_right(90, 90)
-            if is_close(self.multiranger.back):
-                self.motion_commander.start_forward(0.2)
-            if is_close(self.multiranger.left):
-                self.motion_commander.turn_right(45)
-            if is_close(self.multiranger.right):
-                self.motion_commander.turn_left(45)
-            continue
 
     def sendHoverCommand(self):
         self.cf.commander.send_hover_setpoint(
@@ -221,52 +200,6 @@ class Canvas(scene.SceneCanvas):
 
         scene.visuals.XYZAxis(parent=self.view.scene)
 
-    def on_key_press(self, event):
-        if (not event.native.isAutoRepeat()):
-            if (event.native.key() == QtCore.Qt.Key_Left):
-                self.keyCB('y', 1)
-            if (event.native.key() == QtCore.Qt.Key_Right):
-                self.keyCB('y', -1)
-            if (event.native.key() == QtCore.Qt.Key_Up):
-                self.keyCB('x', 1)
-            if (event.native.key() == QtCore.Qt.Key_Down):
-                self.keyCB('x', -1)
-            if (event.native.key() == QtCore.Qt.Key_A):
-                self.keyCB('yaw', -70)
-            if (event.native.key() == QtCore.Qt.Key_D):
-                self.keyCB('yaw', 70)
-            if (event.native.key() == QtCore.Qt.Key_Z):
-                self.keyCB('yaw', -200)
-            if (event.native.key() == QtCore.Qt.Key_X):
-                self.keyCB('yaw', 200)
-            if (event.native.key() == QtCore.Qt.Key_W):
-                self.keyCB('height', 0.1)
-            if (event.native.key() == QtCore.Qt.Key_S):
-                self.keyCB('height', -0.1)
-
-    def on_key_release(self, event):
-        if (not event.native.isAutoRepeat()):
-            if (event.native.key() == QtCore.Qt.Key_Left):
-                self.keyCB('y', 0)
-            if (event.native.key() == QtCore.Qt.Key_Right):
-                self.keyCB('y', 0)
-            if (event.native.key() == QtCore.Qt.Key_Up):
-                self.keyCB('x', 0)
-            if (event.native.key() == QtCore.Qt.Key_Down):
-                self.keyCB('x', 0)
-            if (event.native.key() == QtCore.Qt.Key_A):
-                self.keyCB('yaw', 0)
-            if (event.native.key() == QtCore.Qt.Key_D):
-                self.keyCB('yaw', 0)
-            if (event.native.key() == QtCore.Qt.Key_W):
-                self.keyCB('height', 0)
-            if (event.native.key() == QtCore.Qt.Key_S):
-                self.keyCB('height', 0)
-            if (event.native.key() == QtCore.Qt.Key_Z):
-                self.keyCB('yaw', 0)
-            if (event.native.key() == QtCore.Qt.Key_X):
-                self.keyCB('yaw', 0)
-
     def set_position(self, pos):
         self.last_pos = pos
         if PLOT_CF:
@@ -309,10 +242,12 @@ class Canvas(scene.SceneCanvas):
         pitch = -m['pitch']
         yaw = m['yaw']
 
+        win.motion_commander.start_forward(0.05)
         if (m['up'] < SENSOR_TH and PLOT_SENSOR_UP):
             up = [o[0], o[1], o[2] + m['up'] / 1000.0]
             data.append(self.rot(roll, pitch, yaw, o, up))
-
+        if is_close(m['up']):
+            win.motion_commander.land(0.1)
         if (m['down'] < SENSOR_TH and PLOT_SENSOR_DOWN):
             down = [o[0], o[1], o[2] - m['down'] / 1000.0]
             data.append(self.rot(roll, pitch, yaw, o, down))
@@ -328,11 +263,14 @@ class Canvas(scene.SceneCanvas):
         if (m['front'] < SENSOR_TH):
             front = [o[0] + m['front'] / 1000.0, o[1], o[2]]
             data.append(self.rot(roll, pitch, yaw, o, front))
+        if is_close(m['front']):
+            win.motion_commander.turn_right(90, 90)
+            win.motion_commander.start_forward(0.05)
 
         if (m['back'] < SENSOR_TH):
             back = [o[0] - m['back'] / 1000.0, o[1], o[2]]
             data.append(self.rot(roll, pitch, yaw, o, back))
-
+        print(m)
         return data
 
     def set_measurement(self, measurements):
