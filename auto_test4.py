@@ -324,6 +324,7 @@ if __name__ == '__main__':
     win = MainWindow(URI)
     win.show()
     th_1, th_2 = Thread(target=win.sendHoverCommand), Thread(target=appQt.exec_)
-    th_1.start(), th_2.start()
-    th_1.join(), th_2.join()
+    th_3 = Thread(target=win.canvas.set_measurement)
+    th_1.start(), th_2.start(), th_3.start()
+    th_1.join(), th_2.join(), th_3.join()
 
