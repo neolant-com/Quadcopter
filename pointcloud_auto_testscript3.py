@@ -242,12 +242,10 @@ class Canvas(scene.SceneCanvas):
         pitch = -m['pitch']
         yaw = m['yaw']
 
-        win.motion_commander.start_forward(0.05)
         if (m['up'] < SENSOR_TH and PLOT_SENSOR_UP):
             up = [o[0], o[1], o[2] + m['up'] / 1000.0]
             data.append(self.rot(roll, pitch, yaw, o, up))
-        if is_close(m['up']):
-            win.motion_commander.land(0.1)
+
         if (m['down'] < SENSOR_TH and PLOT_SENSOR_DOWN):
             down = [o[0], o[1], o[2] - m['down'] / 1000.0]
             data.append(self.rot(roll, pitch, yaw, o, down))
@@ -263,14 +261,11 @@ class Canvas(scene.SceneCanvas):
         if (m['front'] < SENSOR_TH):
             front = [o[0] + m['front'] / 1000.0, o[1], o[2]]
             data.append(self.rot(roll, pitch, yaw, o, front))
-        if is_close(m['front']):
-            win.motion_commander.turn_right(90, 90)
-            win.motion_commander.start_forward(0.05)
 
         if (m['back'] < SENSOR_TH):
             back = [o[0] - m['back'] / 1000.0, o[1], o[2]]
             data.append(self.rot(roll, pitch, yaw, o, back))
-        print(m)
+
         return data
 
     def set_measurement(self, measurements):

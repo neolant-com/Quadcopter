@@ -198,27 +198,6 @@ class Canvas(scene.SceneCanvas):
 
         scene.visuals.XYZAxis(parent=self.view.scene)
 
-    def automotion(self):
-        with SyncCrazyflie(URI, cf=MainWindow.cf) as scf:
-            with MotionCommander(scf) as motion_commander:
-                with Multiranger(scf) as multiranger:
-                    keep_flying = True
-                    while keep_flying:
-                        self.keyCB('x', 1)
-                        if (is_close(multiranger.front_distance) and
-                                is_close(multiranger.right) and is_close(multiranger.left)):
-                            self.keyCB('yaw', 180)
-                        if is_close(multiranger.front) and multiranger.right < multiranger.left:
-                            self.keyCB('yaw', 90)
-                        if is_close(multiranger.front) and multiranger.right > multiranger.left:
-                            self.keyCB('yaw', -90)
-                        if is_close(multiranger.up):
-                            self.keyCB('z', -1)
-                        if is_close(multiranger.right):
-                            self.keyCB('yaw', 45)
-                        if is_close(multiranger.left):
-                            self.keyCB('yaw', -45)
-
     def on_key_press(self, event):
         if (not event.native.isAutoRepeat()):
             if (event.native.key() == QtCore.Qt.Key_Left):
@@ -353,40 +332,3 @@ if __name__ == '__main__':
     win = MainWindow(URI)
     win.show()
     appQt.exec_()
-    # cf = Crazyflie(rw_cache='./cache')
-    # with SyncCrazyflie(URI, cf=cf) as scf:
-    #     with MotionCommander(scf) as motion_commander:
-    #         with Multiranger(scf) as multiranger:
-    #             keep_flying = True
-    #
-    #             while keep_flying:
-    #                 motion_commander.start_linear_motion(0.2, 0, 0)
-    #
-    #                 while is_close(multiranger.front) and is_close(multiranger.right) and is_close(multiranger.left):
-    #                     motion_commander.turn_right(180, 90)
-    #                     motion_commander.start_forward(0.1)
-    #
-    #                 while is_close(multiranger.front):
-    #                     motion_commander.turn_right(90, 90)
-    #
-    #                 while is_close(multiranger.front) and is_close(multiranger.right):
-    #                     motion_commander.turn_left(90, 90)
-    #                     motion_commander.start_forward(0.1)
-    #
-    #                 while is_close(multiranger.front) and is_close(multiranger.left):
-    #                     motion_commander.turn_right(90, 90)
-    #                     motion_commander.start_forward(0.1)
-    #
-    #                 while is_close(multiranger.back):
-    #                     motion_commander.start_forward(0.2)
-    #
-    #                 while is_close(multiranger.left):
-    #                     motion_commander.start_right(0.1)
-    #
-    #                 while is_close(multiranger.right):
-    #                     motion_commander.start_left(0.1)
-    #
-    #                 while is_close(multiranger.up):
-    #                     motion_commander.land(0.1)
-    #
-    #                 time.sleep(0.1)
