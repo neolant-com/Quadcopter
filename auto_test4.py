@@ -15,6 +15,8 @@ from vispy import scene
 from vispy.scene import visuals
 from vispy.scene.cameras import TurntableCamera
 import time
+from threading import Thread
+from multiprocessing import Process
 
 import cflib.crtp
 from cflib.crazyflie import Crazyflie
@@ -50,7 +52,7 @@ SPEED_FACTOR = 0.1
 
 
 def is_close(range):
-    MIN_DISTANCE = 0.3  # m
+    MIN_DISTANCE = 300  # mm
 
     if range is None:
         return False
@@ -86,17 +88,19 @@ class MainWindow(QtGui.QMainWindow):
         self.multiranger = Multiranger(self.cf)
         self.KEEP_FLYING = True
         time.sleep(2)
+
+        # self.hover = {'x': 0.0, 'y': 0.0, 'z': 0.0, 'yaw': 0.0, 'height': 0.2}
+
+        # self.hoverTimer = QtCore.QTimer()
+        # self.hoverTimer.timeout.connect(self.sendHoverCommand)
+        # self.hoverTimer.singleShot(self.sendHoverCommand())
+        # self.hoverTimer.start()
+
+
+    def sendHoverCommand(self):
         self.motion_commander.take_off(0.2, 0.2)
         time.sleep(1)
         self.motion_commander.start_forward(0.05)
-        # self.hover = {'x': 0.0, 'y': 0.0, 'z': 0.0, 'yaw': 0.0, 'height': 0.2}
-
-        self.hoverTimer = QtCore.QTimer()
-        self.hoverTimer.timeout.connect(self.sendHoverCommand)
-        self.hoverTimer.setInterval(100)
-        self.hoverTimer.start()
-
-    def sendHoverCommand(self):
         while self.KEEP_FLYING:
             print(f"range.up = {self.measurement['up']}")
             print(f"range.front = {self.measurement['front']}")
@@ -319,4 +323,7 @@ if __name__ == '__main__':
     appQt = QtGui.QApplication(sys.argv)
     win = MainWindow(URI)
     win.show()
-    appQt.exec_()
+    th_1, th_2 = Thread(target=win.sendHoverCommand), Thread(target=appQt.exec_)
+    th_1.start(), th_2.start()
+    th_1.join(), th_2.join()
+
