@@ -6,12 +6,19 @@
  */
 
 
+
 #define DEBUG_MODULE "AMG8833"
+#define AMG_TASK_NAME "AMG"
+#define AMG_TASK_STACKSIZE (2 * configMINIMAL_STACK_SIZE)
+#define AMG_TASK_PRI 3
 
 #include "amg8833.h"
 #include "deck.h"
 #include "debug.h"
 #include "param.h"
+#include "log.h"
+
+#include "task.h"
 //#include "stm32f4xx.h"
 
 const float AMG88xx_TEMP_CONVERSION = 0.25;
@@ -20,6 +27,20 @@ const float AMG88xx_THRM_CONVERSION = 0.0625;
 static uint8_t mode = 1;
 
 static bool isInit = false;
+
+static float pixelLog[64];
+
+static void amgTask(AMG8833_Dev_t *dev)
+{
+	systemWaitStart();
+
+    TickType_t lastWakeTime = xTaskGetTickCount();
+    while(1)
+    {
+    	vTaskDelayUntil(&lastWakeTime, M2T(100));
+    	readPixels(&dev, pixelLog, 64);
+    }
+}
 
 static void amg8833init(AMG8833_Dev_t *dev)
 {
@@ -39,11 +60,18 @@ static void amg8833init(AMG8833_Dev_t *dev)
 	  DEBUG_PRINT("AMG8833 deck driver initialized!\n");
 	  isInit = i2c_complete && mode_selected && software_resetted &&
 	    interrupts_set && fps_set;
+	  readPixels(&dev, pixelLog, 64);
+
+	  xTaskCreate(amgTask, AMG_TASK_NAME, AMG_TASK_STACKSIZE, NULL,
+	        MULTIRANGER_TASK_PRI, NULL);
 }
 
 static bool amg8833test()
 {
-	DEBUG_PRINT("AMG8833 driver tested!\n");
+	if (isInit)
+			{
+				DEBUG_PRINT("AMG8833 driver tested!\n");
+			}
 	return true;
 }
 
@@ -309,3 +337,8 @@ DECK_DRIVER(amg8833Driver);
 PARAM_GROUP_START(deck)
 PARAM_ADD(PARAM_UINT8 | PARAM_RONLY, amg8833deck, &isInit)
 PARAM_GROUP_STOP(deck)
+
+LOG_GROUP_START(amg)
+LOG_ADD(LOG_FLOAT, onePixel, &pixelLog[0])
+LOG_ADD(LOG_FLOAT, picture, &pixelLog)
+LOG_GROUP_STOP(amg)
