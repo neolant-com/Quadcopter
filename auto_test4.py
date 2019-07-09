@@ -88,48 +88,44 @@ class MainWindow(QtGui.QMainWindow):
         self.multiranger = Multiranger(self.cf)
         self.KEEP_FLYING = True
         time.sleep(2)
-
-        # self.hover = {'x': 0.0, 'y': 0.0, 'z': 0.0, 'yaw': 0.0, 'height': 0.2}
-
-        # self.hoverTimer = QtCore.QTimer()
-        # self.hoverTimer.timeout.connect(self.sendHoverCommand)
-        # self.hoverTimer.singleShot(self.sendHoverCommand())
-        # self.hoverTimer.start()
-
-
-    def sendHoverCommand(self):
         self.motion_commander.take_off(0.2, 0.2)
         time.sleep(1)
         self.motion_commander.start_forward(0.05)
-        while self.KEEP_FLYING:
-            print(f"range.up = {self.measurement['up']}")
-            print(f"range.front = {self.measurement['front']}")
-            print(f"range.left = {self.measurement['left']}")
-            print(f"range.right = {self.measurement['right']}")
-            print(f"is_close(up) = {is_close(self.measurement['up'])}")
-            if is_close(self.measurement['up']):
-                self.motion_commander.land(0.1)
-                self.KEEP_FLYING = False
-            if is_close(self.measurement['front']):
-                self.motion_commander.turn_right(90, 90)
-                time.sleep(1)
-                self.motion_commander.start_forward(0.05)
-            if is_close(self.measurement['front']) and self.measurement['left'] > self.measurement['right']:
-                self.motion_commander.turn_left(90, 90)
-                time.sleep(1)
-                self.motion_commander.start_forward(0.05)
-            if is_close(self.measurement['front']) and self.measurement['left'] < self.measurement['right']:
-                self.motion_commander.turn_right(90, 90)
-                time.sleep(1)
-                self.motion_commander.start_forward(0.05)
-            if is_close(self.measurement['left']):
-                self.motion_commander.turn_right(45, 90)
-                time.sleep(1)
-                self.motion_commander.start_forward(0.05)
-            if is_close(self.measurement['right']):
-                self.motion_commander.turn_left(45, 90)
-                time.sleep(1)
-                self.motion_commander.start_forward(0.05)
+        # self.hover = {'x': 0.0, 'y': 0.0, 'z': 0.0, 'yaw': 0.0, 'height': 0.2}
+
+        self.hoverTimer = QtCore.QTimer()
+        self.hoverTimer.timeout.connect(self.sendHoverCommand)
+        self.hoverTimer.setInterval(250)
+        self.hoverTimer.start()
+
+    def sendHoverCommand(self):
+        print(f"range.up = {self.measurement['up']}")
+        print(f"range.front = {self.measurement['front']}")
+        print(f"range.left = {self.measurement['left']}")
+        print(f"range.right = {self.measurement['right']}")
+        print(f"is_close(up) = {is_close(self.measurement['up'])}")
+        if is_close(self.measurement['up']):
+            self.motion_commander.land(0.1)
+        if is_close(self.measurement['front']):
+            self.motion_commander.turn_right(90, 90)
+            time.sleep(0.5)
+            self.motion_commander.start_forward(0.05)
+        if is_close(self.measurement['front']) and self.measurement['left'] > self.measurement['right']:
+            self.motion_commander.turn_left(90, 90)
+            time.sleep(0.5)
+            self.motion_commander.start_forward(0.05)
+        if is_close(self.measurement['front']) and self.measurement['left'] < self.measurement['right']:
+            self.motion_commander.turn_right(90, 90)
+            time.sleep(0.5)
+            self.motion_commander.start_forward(0.05)
+        if is_close(self.measurement['left']):
+            self.motion_commander.turn_right(45, 90)
+            time.sleep(0.5)
+            self.motion_commander.start_forward(0.05)
+        if is_close(self.measurement['right']):
+            self.motion_commander.turn_left(45, 90)
+            time.sleep(0.5)
+            self.motion_commander.start_forward(0.05)
 
     # def updateHover(self, k, v):
     #     if k != 'height':
@@ -304,7 +300,7 @@ class Canvas(scene.SceneCanvas):
 
         return data
 
-    def set_measurement(self, measurements):
+    def set_measurement(self, measurements=None):
         data = self.rotate_and_create_points(measurements)
         o = self.last_pos
         for i in range(6):
@@ -323,8 +319,8 @@ if __name__ == '__main__':
     appQt = QtGui.QApplication(sys.argv)
     win = MainWindow(URI)
     win.show()
-    th_1, th_2 = Thread(target=win.sendHoverCommand), Thread(target=appQt.exec_)
-    th_3 = Thread(target=win.canvas.set_measurement)
-    th_1.start(), th_2.start(), th_3.start()
-    th_1.join(), th_2.join(), th_3.join()
+    # th_1, th_2, th_3 = Thread(target=win.sendHoverCommand), Thread(target=appQt.exec_), Thread(target=win.canvas.set_measurement(win.measurement))
+    # th_1.start(), th_2.start(), th_3.start()
+    # th_1.join(), th_2.join(), th_3.join()
+    appQt.exec_()
 

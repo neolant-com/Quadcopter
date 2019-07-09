@@ -93,7 +93,6 @@ class MainWindow(QtGui.QMainWindow):
     def automotion(self):
         while 1:
             print(f"Multiranger.up = {self.multiranger.up}, {type(self.multiranger.up)}")
-            print(f"Data from logs = ")
             if is_close(self.multiranger.up):
                 self.motion_commander.land(0.1)
                 break
@@ -109,7 +108,6 @@ class MainWindow(QtGui.QMainWindow):
                 self.motion_commander.turn_right(45)
             if is_close(self.multiranger.right):
                 self.motion_commander.turn_left(45)
-            continue
 
     def sendHoverCommand(self):
         self.cf.commander.send_hover_setpoint(
