@@ -90,13 +90,13 @@ class MainWindow(QtGui.QMainWindow):
         time.sleep(2)
         self.motion_commander.take_off(0.2, 0.2)
         time.sleep(1)
-        self.motion_commander.start_forward(0.05)
+        self.motion_commander.start_forward(0.1)
         time.sleep(0.5)
         # self.hover = {'x': 0.0, 'y': 0.0, 'z': 0.0, 'yaw': 0.0, 'height': 0.2}
 
         self.hoverTimer = QtCore.QTimer()
         self.hoverTimer.timeout.connect(self.sendHoverCommand)
-        self.hoverTimer.setInterval(1000)
+        self.hoverTimer.setInterval(0.1)
         self.hoverTimer.start()
 
     def sendHoverCommand(self):
@@ -107,26 +107,28 @@ class MainWindow(QtGui.QMainWindow):
         print(f"is_close(up) = {is_close(self.measurement['up'])}")
         if is_close(self.measurement['up']):
             self.motion_commander.land(0.1)
+            self.KEEP_FLYING = False
+            appQt.exit()
         if is_close(self.measurement['front']):
-            self.motion_commander.turn_right(90, 180)
-            time.sleep(0.5)
-            self.motion_commander.start_forward(0.05)
+            self.motion_commander.turn_right(30, 180)
+            time.sleep(0.1)
+            self.motion_commander.start_forward(0.1)
         if is_close(self.measurement['front']) and self.measurement['left'] > self.measurement['right']:
-            self.motion_commander.turn_left(90, 180)
-            time.sleep(0.5)
-            self.motion_commander.start_forward(0.05)
+            self.motion_commander.turn_left(30, 180)
+            time.sleep(0.1)
+            self.motion_commander.start_forward(0.1)
         if is_close(self.measurement['front']) and self.measurement['left'] < self.measurement['right']:
-            self.motion_commander.turn_right(90, 180)
-            time.sleep(0.5)
-            self.motion_commander.start_forward(0.05)
+            self.motion_commander.turn_right(30, 180)
+            time.sleep(0.1)
+            self.motion_commander.start_forward(0.1)
         if is_close(self.measurement['left']):
-            self.motion_commander.turn_right(45, 90)
-            time.sleep(0.5)
-            self.motion_commander.start_forward(0.05)
+            self.motion_commander.turn_right(15, 90)
+            time.sleep(0.1)
+            self.motion_commander.start_forward(0.1)
         if is_close(self.measurement['right']):
-            self.motion_commander.turn_left(45, 90)
-            time.sleep(0.5)
-            self.motion_commander.start_forward(0.05)
+            self.motion_commander.turn_left(15, 90)
+            time.sleep(0.1)
+            self.motion_commander.start_forward(0.1)
 
     # def updateHover(self, k, v):
     #     if k != 'height':
@@ -136,6 +138,7 @@ class MainWindow(QtGui.QMainWindow):
 
     def disconnected(self, URI):
         print('Disconnected')
+        appQt.exit()
 
     def connected(self, URI):
         print('We are now connected to {}'.format(URI))
@@ -204,6 +207,7 @@ class MainWindow(QtGui.QMainWindow):
     def closeEvent(self, event):
         if self.cf is not None:
             self.cf.close_link()
+        appQt.exit()
 
 
 class Canvas(scene.SceneCanvas):
