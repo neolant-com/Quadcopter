@@ -91,7 +91,7 @@ class MainWindow(QtGui.QMainWindow):
         self.motion_commander.take_off(0.2, 0.2)
         time.sleep(1)
         self.motion_commander.start_forward(0.05)
-        time.sleep(1)
+        time.sleep(0.5)
         # self.hover = {'x': 0.0, 'y': 0.0, 'z': 0.0, 'yaw': 0.0, 'height': 0.2}
 
         self.hoverTimer = QtCore.QTimer()
