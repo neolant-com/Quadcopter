@@ -91,11 +91,12 @@ class MainWindow(QtGui.QMainWindow):
         self.motion_commander.take_off(0.2, 0.2)
         time.sleep(1)
         self.motion_commander.start_forward(0.05)
+        time.sleep(1)
         # self.hover = {'x': 0.0, 'y': 0.0, 'z': 0.0, 'yaw': 0.0, 'height': 0.2}
 
         self.hoverTimer = QtCore.QTimer()
         self.hoverTimer.timeout.connect(self.sendHoverCommand)
-        self.hoverTimer.setInterval(250)
+        self.hoverTimer.setInterval(1000)
         self.hoverTimer.start()
 
     def sendHoverCommand(self):
@@ -107,15 +108,15 @@ class MainWindow(QtGui.QMainWindow):
         if is_close(self.measurement['up']):
             self.motion_commander.land(0.1)
         if is_close(self.measurement['front']):
-            self.motion_commander.turn_right(90, 90)
+            self.motion_commander.turn_right(90, 180)
             time.sleep(0.5)
             self.motion_commander.start_forward(0.05)
         if is_close(self.measurement['front']) and self.measurement['left'] > self.measurement['right']:
-            self.motion_commander.turn_left(90, 90)
+            self.motion_commander.turn_left(90, 180)
             time.sleep(0.5)
             self.motion_commander.start_forward(0.05)
         if is_close(self.measurement['front']) and self.measurement['left'] < self.measurement['right']:
-            self.motion_commander.turn_right(90, 90)
+            self.motion_commander.turn_right(90, 180)
             time.sleep(0.5)
             self.motion_commander.start_forward(0.05)
         if is_close(self.measurement['left']):
