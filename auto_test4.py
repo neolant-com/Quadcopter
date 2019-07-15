@@ -9,6 +9,7 @@ The demo is ended by either closing the graph window.
 import logging
 import math
 import sys
+import csv
 
 import numpy as np
 from vispy import scene
@@ -36,7 +37,7 @@ except ImportError:
 from PyQt4 import QtGui, QtCore
 
 logging.basicConfig(level=logging.INFO)
-URI = 'radio://0/65/1M'
+URI = 'radio://0/80/1M/E7E7E7E703'
 if len(sys.argv) > 1:
     URI = sys.argv[1]
 
@@ -52,7 +53,7 @@ SPEED_FACTOR = 0.1
 
 
 def is_close(range):
-    MIN_DISTANCE = 300  # mm
+    MIN_DISTANCE = 350  # mm
 
     if range is None:
         return False
@@ -87,7 +88,7 @@ class MainWindow(QtGui.QMainWindow):
         self.motion_commander = MotionCommander(self.cf)
         self.multiranger = Multiranger(self.cf)
         self.KEEP_FLYING = True
-        time.sleep(2)
+        time.sleep(3)
         self.motion_commander.take_off(0.2, 0.2)
         time.sleep(1)
         self.motion_commander.start_forward(0.15)
@@ -113,20 +114,22 @@ class MainWindow(QtGui.QMainWindow):
         #     time.sleep(0.1)
         #     self.motion_commander.start_forward(0.15)
         if is_close(self.measurement['front']) and self.measurement['left'] > self.measurement['right']:
-            self.motion_commander.left(0.1, 0.2)
-            self.motion_commander.turn_left(5, 70)
+            self.motion_commander.stop()
+            self.motion_commander.turn_left(60, 70)
             self.motion_commander.start_forward(0.15)
         if is_close(self.measurement['front']) and self.measurement['left'] < self.measurement['right']:
-            self.motion_commander.right(0.1, 0.2)
-            self.motion_commander.turn_right(5, 70)
+            self.motion_commander.stop()
+            self.motion_commander.turn_right(60, 70)
             self.motion_commander.start_forward(0.15)
         if is_close(self.measurement['left']):
             self.motion_commander.right(0.1, 0.2)
-            self.motion_commander.turn_right(5, 70)
+            self.motion_commnder.stop()
+            self.motion_commander.turn_right(45, 70)
             self.motion_commander.start_forward(0.15)
         if is_close(self.measurement['right']):
             self.motion_commander.left(0.1, 0.2)
-            self.motion_commander.turn_left(5, 70)
+            self.motion_commander.stop()
+            self.motion_commander.turn_left(45, 70)
             self.motion_commander.start_forward(0.15)
 
     def disconnected(self, URI):
@@ -309,6 +312,14 @@ class Canvas(scene.SceneCanvas):
         if len(data) > 0:
             self.meas_data = np.append(self.meas_data, data, axis=0)
         self.meas_markers.set_data(self.meas_data, face_color='blue', size=5)
+        self.write_in_file()
+
+    def write_in_file(self):
+        with open('coordinates.csv', 'w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerows(self.meas_data)
+
+
 
 
 if __name__ == '__main__':
@@ -316,4 +327,3 @@ if __name__ == '__main__':
     win = MainWindow(URI)
     win.show()
     appQt.exec_()
-
