@@ -46,7 +46,7 @@ PLOT_CF = False
 PLOT_SENSOR_UP = False
 PLOT_SENSOR_DOWN = False
 # Set the sensor threashold (in mm)
-SENSOR_TH = 4000
+SENSOR_TH = 1500
 # Set the speed factor for moving and rotating
 SPEED_FACTOR = 0.1
 
@@ -90,13 +90,12 @@ class MainWindow(QtGui.QMainWindow):
         time.sleep(2)
         self.motion_commander.take_off(0.2, 0.2)
         time.sleep(1)
-        self.motion_commander.start_forward(0.1)
+        self.motion_commander.start_forward(0.15)
         time.sleep(0.5)
-        # self.hover = {'x': 0.0, 'y': 0.0, 'z': 0.0, 'yaw': 0.0, 'height': 0.2}
 
         self.hoverTimer = QtCore.QTimer()
         self.hoverTimer.timeout.connect(self.sendHoverCommand)
-        self.hoverTimer.setInterval(0.1)
+        self.hoverTimer.setInterval(0.25)
         self.hoverTimer.start()
 
     def sendHoverCommand(self):
@@ -104,41 +103,34 @@ class MainWindow(QtGui.QMainWindow):
         print(f"range.front = {self.measurement['front']}")
         print(f"range.left = {self.measurement['left']}")
         print(f"range.right = {self.measurement['right']}")
-        print(f"is_close(up) = {is_close(self.measurement['up'])}")
-        if is_close(self.measurement['up']):
-            self.motion_commander.land(0.1)
-            self.KEEP_FLYING = False
-            appQt.exit()
-        if is_close(self.measurement['front']):
-            self.motion_commander.turn_right(30, 180)
-            time.sleep(0.1)
-            self.motion_commander.start_forward(0.1)
+        # print(f"is_close(up) = {is_close(self.measurement['up'])}")
+        # if is_close(self.measurement['up']):
+        #     self.motion_commander.land(0.1)
+        #     self.KEEP_FLYING = False
+        #     appQt.exit()
+        # if is_close(self.measurement['front']):
+        #     self.motion_commander.turn_right(15, 70)
+        #     time.sleep(0.1)
+        #     self.motion_commander.start_forward(0.15)
         if is_close(self.measurement['front']) and self.measurement['left'] > self.measurement['right']:
-            self.motion_commander.turn_left(30, 180)
-            time.sleep(0.1)
-            self.motion_commander.start_forward(0.1)
+            self.motion_commander.left(0.1, 0.2)
+            self.motion_commander.turn_left(5, 70)
+            self.motion_commander.start_forward(0.15)
         if is_close(self.measurement['front']) and self.measurement['left'] < self.measurement['right']:
-            self.motion_commander.turn_right(30, 180)
-            time.sleep(0.1)
-            self.motion_commander.start_forward(0.1)
+            self.motion_commander.right(0.1, 0.2)
+            self.motion_commander.turn_right(5, 70)
+            self.motion_commander.start_forward(0.15)
         if is_close(self.measurement['left']):
-            self.motion_commander.turn_right(15, 90)
-            time.sleep(0.1)
-            self.motion_commander.start_forward(0.1)
+            self.motion_commander.right(0.1, 0.2)
+            self.motion_commander.turn_right(5, 70)
+            self.motion_commander.start_forward(0.15)
         if is_close(self.measurement['right']):
-            self.motion_commander.turn_left(15, 90)
-            time.sleep(0.1)
-            self.motion_commander.start_forward(0.1)
-
-    # def updateHover(self, k, v):
-    #     if k != 'height':
-    #         self.hover[k] = v * SPEED_FACTOR
-    #     else:
-    #         self.hover[k] += v
+            self.motion_commander.left(0.1, 0.2)
+            self.motion_commander.turn_left(5, 70)
+            self.motion_commander.start_forward(0.15)
 
     def disconnected(self, URI):
         print('Disconnected')
-        appQt.exit()
 
     def connected(self, URI):
         print('We are now connected to {}'.format(URI))
@@ -207,7 +199,6 @@ class MainWindow(QtGui.QMainWindow):
     def closeEvent(self, event):
         if self.cf is not None:
             self.cf.close_link()
-        appQt.exit()
 
 
 class Canvas(scene.SceneCanvas):
@@ -324,8 +315,5 @@ if __name__ == '__main__':
     appQt = QtGui.QApplication(sys.argv)
     win = MainWindow(URI)
     win.show()
-    # th_1, th_2, th_3 = Thread(target=win.sendHoverCommand), Thread(target=appQt.exec_), Thread(target=win.canvas.set_measurement(win.measurement))
-    # th_1.start(), th_2.start(), th_3.start()
-    # th_1.join(), th_2.join(), th_3.join()
     appQt.exec_()
 
