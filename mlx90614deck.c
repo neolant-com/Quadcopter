@@ -32,6 +32,15 @@ static void mlxTask(void *param)
 
         int8_t ErrTa = mlx9061x_ReadTa(I2C1, MLX9061X_I2C_ADDR, &Ta);
         int8_t ErrTo1 = mlx9061x_ReadTo1(I2C1, MLX9061X_I2C_ADDR, &To1);
+	if (ErrTa)
+		DEBUG_PRINT("Tamb = Err%d \r\n", ErrTa);
+	else
+		DEBUG_PRINT("Tamb = %3.1f \r\n", Ta);
+	
+	if (ErrTo1)
+		DEBUG_PRINT("Tobj = Err%d ", ErrTo1);
+   	else
+		DEBUG_PRINT("Tobj = %3.1f ", To1);
 	}
 
 }
@@ -39,6 +48,8 @@ static void mlxTask(void *param)
 
 void mlxInit(DeckInfo *info)
 {
+	if (isInit)
+		return;
 	mlx90614_init(I2C1);
 	isInit = true;
 	DEBUG_PRINT("MLX90614 initialized!");
@@ -48,7 +59,16 @@ void mlxInit(DeckInfo *info)
 
 bool mlxTest()
 {
-    DEBUG_PRINT("MLX90614 tested!");
+	if (ErrTa)
+		DEBUG_PRINT("Tamb = Err%d \r\n", ErrTa);
+	else
+		DEBUG_PRINT("Tamb = %3.1f \r\n", Ta);
+	
+	if (ErrTo1)
+		DEBUG_PRINT("Tobj = Err%d ", ErrTo1);
+   	else
+		DEBUG_PRINT("Tobj = %3.1f ", To1);
+    	DEBUG_PRINT("MLX90614 tested!");
 	return true;
 }
 
