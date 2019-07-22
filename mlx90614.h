@@ -15,7 +15,7 @@
 // ****************************************************/
 //
 //
-//#define MLX90614_I2CADDR 0x5A
+//#define MLX90614_I2CADDR 0xB4
 //
 //// RAM
 //#define MLX90614_RAWIR1 0x04
