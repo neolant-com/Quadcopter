@@ -9,7 +9,7 @@
 #include "param.h"
 #include "deck.h"
 #include "mlx90614.h"
-//#include "system.h"
+#include "system.h"
 #include "FreeRTOS.h"
 #include "task.h"
 
