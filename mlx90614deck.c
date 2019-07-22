@@ -9,21 +9,45 @@
 #include "param.h"
 #include "deck.h"
 #include "mlx90614.h"
+//#include "system.h"
+#include "FreeRTOS.h"
+#include "task.h"
+
+
+#define MLX_TASK_NAME "MLX"
+#define MLX_TASK_STACKSIZE (2 * configMINIMAL_STACK_SIZE)
+#define MLX_TASK_PRI 3
 
 static bool isInit = false;
 static float Ta, To1;
+
+static void mlxTask(void *param)
+{
+	systemWaitStart();
+	TickType_t lastWakeTime = xTaskGetTickCount();
+
+	while(1)
+	{
+        vTaskDelayUntil(&lastWakeTime, M2T(100));
+
+        int8_t ErrTa = mlx9061x_ReadTa(I2C1, MLX9061X_I2C_ADDR, &Ta);
+        int8_t ErrTo1 = mlx9061x_ReadTo1(I2C1, MLX9061X_I2C_ADDR, &To1);
+	}
+
+}
+
 
 void mlxInit(DeckInfo *info)
 {
 	mlx90614_init(I2C1);
 	isInit = true;
 	DEBUG_PRINT("MLX90614 initialized!");
+
+    xTaskCreate(mlxTask, MLX_TASK_NAME, MLX_TASK_STACKSIZE, NULL, MLX_TASK_PRI, NULL);
 }
 
 bool mlxTest()
 {
-    int8_t ErrTa = mlx9061x_ReadTa(I2C1, MLX9061X_I2C_ADDR, &Ta);
-    int8_t ErrTo1 = mlx9061x_ReadTo1(I2C1, MLX9061X_I2C_ADDR, &To1);
     DEBUG_PRINT("MLX90614 tested!");
 	return true;
 }
