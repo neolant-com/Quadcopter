@@ -36,7 +36,7 @@
 //double mlx90614_readObjectTempF(void) {
 //  return (readTemp(MLX90614_TOBJ1) * 9 / 5) + 32;
 //}
-//
+////
 //
 //double mlx90614_readAmbientTempF(void) {
 //  return (readTemp(MLX90614_TA) * 9 / 5) + 32;
@@ -110,31 +110,31 @@ int8_t mlx9061x_ReadReg(I2C_TypeDef* I2Cx, uint8_t slave_addr, uint8_t RamAddr, 
   uint8_t crc = 0;
   uint8_t ReadBuff[3];
 
-  // Выдаём первый START на шину
+  // Г‚Г»Г¤Г ВёГ¬ ГЇГҐГ°ГўГ»Г© START Г­Г  ГёГЁГ­Гі
   err = i2cm_Start(I2Cx, MLX9061X_I2C_ADDR, 0, MLX9061X_I2C_TO);
   crc = mlx90614_crc8_byte(MLX9061X_I2C_ADDR, crc);
   if (err) return err;
-  // Выдаём команду (внутренний адрес) в mlx9061x
+  // Г‚Г»Г¤Г ВёГ¬ ГЄГ®Г¬Г Г­Г¤Гі (ГўГ­ГіГІГ°ГҐГ­Г­ГЁГ© Г Г¤Г°ГҐГ±) Гў mlx9061x
   err = i2cm_WriteBuff(I2Cx, &RamAddr, 1, MLX9061X_I2C_TO);
   crc = mlx90614_crc8_byte(RamAddr, crc);
   if (err) return err;
 
-  // Выдаём повторный START перед началом чтения
+  // Г‚Г»Г¤Г ВёГ¬ ГЇГ®ГўГІГ®Г°Г­Г»Г© START ГЇГҐГ°ГҐГ¤ Г­Г Г·Г Г«Г®Г¬ Г·ГІГҐГ­ГЁГї
   err = i2cm_Start(I2Cx, MLX9061X_I2C_ADDR, 1, MLX9061X_I2C_TO);
   crc = mlx90614_crc8_byte(MLX9061X_I2C_ADDR | 1, crc);
   if (err) return err;
 
-  // Читаем 2 байта и CRC (PEC)
+  // Г—ГЁГІГ ГҐГ¬ 2 ГЎГ Г©ГІГ  ГЁ CRC (PEC)
   err = i2cm_ReadBuffAndStop(I2Cx, ReadBuff, 3, MLX9061X_I2C_TO);
   if (err) return err;
 
-  // Считаем CRC и сверяем с байтом PEC
+  // Г‘Г·ГЁГІГ ГҐГ¬ CRC ГЁ Г±ГўГҐГ°ГїГҐГ¬ Г± ГЎГ Г©ГІГ®Г¬ PEC
   for (uint8_t i = 0; i < 3; i++)
     crc = mlx90614_crc8_byte(ReadBuff[i], crc);
   if (crc)
     return MLX9061X_ERR_BadChksum;
 
-  // Пересчитываем в физ. величины
+  // ГЏГҐГ°ГҐГ±Г·ГЁГІГ»ГўГ ГҐГ¬ Гў ГґГЁГ§. ГўГҐГ«ГЁГ·ГЁГ­Г»
   uint16_t Temp16 = ReadBuff[0] | (((uint16_t)ReadBuff[1]) << 8);
 
   if (Temp16 & 0x8000)
